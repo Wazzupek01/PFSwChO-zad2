@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-deployment
+  namespace: lamp-stack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apache-php
+  template:
+    metadata:
+      labels:
+        app: apache-php
+    spec:
+      containers:
+      - name: php-deployment
+        image: php:7.4-apache
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: app
+          mountPath: /var/www/html/
+        env:
+        - name: REPLICA_NUMBER
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['pod-template-hash']
+        command: ["/bin/bash", "-c", "docker-php-ext-install mysqli && docker-php-ext-enable mysqli && apache2-foreground"]
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: app
+        configMap:
+          name: php-index

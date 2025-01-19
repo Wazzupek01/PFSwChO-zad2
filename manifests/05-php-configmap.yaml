@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: php-index
+  namespace: lamp-stack
+data:
+  index.php: |
+    <?php
+      $servername = "mysql";
+
+      $username = "root";
+      $password = "mypassword";
+      $dbname = "test";
+
+      $replica_number = getenv('REPLICA_NUMBER');
+      echo "<p>Replica Number: " . htmlspecialchars($replica_number) . "</p>";
+
+      $conn = new mysqli($servername, $username, $password, $dbname);
+
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      }
+
+      if ($_SERVER["REQUEST_METHOD"] == "POST") {
+          $user = $_POST['username'];
+          $message = $_POST['message'];
+
+          $sql = "INSERT INTO messages (username, content) VALUES ('$user', '$message')";
+          if ($conn->query($sql) === TRUE) {
+              echo "New message created successfully";
+          } else {
+              echo "Error: " . $sql . "<br>" . $conn->error;
+          }
+      }
+
+      $sql = "SELECT username, content FROM messages";
+      $result = $conn->query($sql);
+      ?>
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Message Board</title>
+      </head>
+      <body>
+          <h1>Message Board</h1>
+          <h2>Messages</h2>
+          <ul>
+              <?php
+              if ($result->num_rows > 0) {
+                  while($row = $result->fetch_assoc()) {
+                      echo "<li>" . htmlspecialchars($row["username"]) . ": " . htmlspecialchars($row["content"]) . "</li>";
+                  }
+              } else {
+                  echo "<li>No messages</li>";
+              }
+              ?>
+          </ul>
+          <form method="post" action="">
+              Username: <input type="text" name="username" required>
+              Message: <textarea name="message" required></textarea>
+              <input type="submit" value="Send">
+          </form>
+          <?php $conn->close(); ?>
+      </body>
+      </html>
