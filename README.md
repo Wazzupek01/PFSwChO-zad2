@@ -61,3 +61,36 @@ LAMP (Linux, Apache, MySQL, PHP)
 2. Add a message through the interface.
 3. Verify that the message appears in the list.
 
+You can also simply verify proper displayment of preexisting messages using curl. Sample output from working application:
+```bash
+curl --resolve "lamp.local:80:$( minikube ip )" -i http://lamp.local/
+
+HTTP/1.1 200 OK
+Date: Sun, 19 Jan 2025 17:16:13 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 633
+Connection: keep-alive
+X-Powered-By: PHP/7.4.33
+Vary: Accept-Encoding
+
+<p>Replica Number: 68f54f9d4f</p>
+  <!DOCTYPE html>
+  <html>
+  <head>
+      <title>Message Board</title>
+  </head>
+  <body>
+      <h1>Message Board</h1>
+      <h2>Messages</h2>
+      <ul>
+          <li>user1: Hello, world!</li><li>user2: This is a test message.</li><li>user3: Another random message.</li>
+      </ul>
+      <form method="post" action="">
+          Username: <input type="text" name="username" required>
+          Message: <textarea name="message" required></textarea>
+          <input type="submit" value="Send">
+      </form>
+        </body>
+  </html>
+```
+
